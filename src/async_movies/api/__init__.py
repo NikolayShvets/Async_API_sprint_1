@@ -1,0 +1,1 @@
+from async_movies.api.v1.router import api_router

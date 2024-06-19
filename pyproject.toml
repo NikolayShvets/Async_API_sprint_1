@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "async-movies"
+version = "0.1.0"
+description = ""
+authors = ["Швец Николай <kolya.shvets20@gmail.com>"]
+readme = "README.md"
+packages = [{include = "async_movies", from = "src"}]
+
+[tool.poetry.dependencies]
+python = "^3.12"
+fastapi = "^0.111.0"
+sqlalchemy = "^2.0.31"
+alembic = "^1.13.1"
+pydantic = "^2.7.4"
+pydantic-settings = "^2.3.3"
+asyncpg = "^0.29.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
