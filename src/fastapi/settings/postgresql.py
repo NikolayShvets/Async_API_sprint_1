@@ -1,5 +1,6 @@
 from pydantic import PostgresDsn, SecretStr, field_validator
 from pydantic_core.core_schema import FieldValidationInfo
+
 from settings.base import BaseSettings
 
 
@@ -12,9 +13,7 @@ class PostgreSQLSettings(BaseSettings):
     DSN: str | None = None
 
     @field_validator("DSN", mode="before")
-    def assemble_db_url(
-        cls, value: str | None, info: FieldValidationInfo
-    ) -> str:
+    def assemble_db_url(cls, value: str | None, info: FieldValidationInfo) -> str:
         if isinstance(value, str):
             return value
 

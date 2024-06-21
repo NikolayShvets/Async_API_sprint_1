@@ -1,12 +1,13 @@
 from contextlib import asynccontextmanager
 
 import asyncpg
+from elasticsearch import AsyncElasticsearch
+from redis.asyncio import StrictRedis
+
 from api.v1.router import api_router
 from db import elasticsearch, postgresql, redis
-from elasticsearch import AsyncElasticsearch
 from fastapi import FastAPI
 from fastapi.responses import ORJSONResponse
-from redis.asyncio import StrictRedis
 from settings.api import api_settings
 from settings.elasticsearch import elasticsearch_settings
 from settings.postgresql import postgresql_settings
