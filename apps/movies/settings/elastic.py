@@ -3,12 +3,12 @@ from pydantic_core.core_schema import FieldValidationInfo
 from settings.base import BaseSettings
 
 
-class ElasticsearchSettings(BaseSettings):
-    ELASTICSEARCH_HOST: str
-    ELASTICSEARCH_PORT: int
-    ELASTICSEARCH_URL: str | None = None
+class ElasticSettings(BaseSettings):
+    ELASTIC_HOST: str
+    ELASTIC_PORT: int
+    ELASTIC_URL: str | None = None
 
-    @field_validator("ELASTICSEARCH_URL", mode="before")
+    @field_validator("ELASTIC_URL", mode="before")
     def assemble_elasticsearch_url(
         cls, v: str | None, info: FieldValidationInfo
     ) -> str:
@@ -16,11 +16,11 @@ class ElasticsearchSettings(BaseSettings):
             return v
 
         scheme = "http"
-        host = info.data["ELASTICSEARCH_HOST"]
-        port = info.data["ELASTICSEARCH_PORT"]
+        host = info.data["ELASTIC_HOST"]
+        port = info.data["ELASTIC_PORT"]
 
         url = f"{scheme}://{host}:{port}"
         return HttpUrl(url).unicode_string()
 
 
-elasticsearch_settings = ElasticsearchSettings()
+elastic_settings = ElasticSettings()

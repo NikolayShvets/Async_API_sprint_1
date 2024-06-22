@@ -9,8 +9,6 @@ RUN apt update && pip install --upgrade pip
 COPY /requirements/base.txt requirements.txt
 RUN pip install -r requirements.txt
 
-COPY ./src .
+COPY . .
 
 EXPOSE 8000
-
-ENTRYPOINT [ "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000" ]

@@ -1,6 +1,6 @@
 from api.deps import FilmService
-from api.v1.models import Film
 from fastapi import APIRouter, HTTPException, status
+from schemas import Film
 
 router = APIRouter()
 

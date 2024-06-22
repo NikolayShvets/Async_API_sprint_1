@@ -1,4 +1,4 @@
-from api.v1.models.base import BaseModel
+from schemas.base import BaseModel
 
 
 class Film(BaseModel):
