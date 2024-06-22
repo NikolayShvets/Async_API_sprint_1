@@ -1,4 +1,5 @@
-.PHONY: up down local down_local
+.PHONY: up down local lint
+
 up:
 	docker compose up --build
 
@@ -8,7 +9,9 @@ down:
 local:
 	docker compose -f docker-compose.local.yml up -d --build
 
-down_local:
-	docker compose -f docker-compose.local.yml down -v --remove-orphans
+lint:
+	isort .
+	black .
+
 
 .DEFAULT_GOAL := up
