@@ -39,7 +39,7 @@ cd ../../ &&  make
 
 ## Test and Lint
 
-- run linters(ruff) and mypy
+* run linters(ruff) and mypy
 ```bash
 make plint 
 ```

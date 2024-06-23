@@ -1,4 +1,4 @@
-CODE ?= .
+CODE ?= ./apps
 
 .PHONY: up down local lint
 

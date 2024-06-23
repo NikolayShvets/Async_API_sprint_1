@@ -3,7 +3,7 @@ from uuid import UUID
 from pydantic import BaseModel
 
 
-class Film(BaseModel):
+class Genre(BaseModel):
     id: UUID
-    title: str
+    name: str
     description: str | None = None
