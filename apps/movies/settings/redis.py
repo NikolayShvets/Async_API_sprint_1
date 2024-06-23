@@ -10,6 +10,7 @@ class RedisSettings(BaseSettings):
     REDIS_URL: str | None = None
 
     @field_validator("REDIS_URL", mode="before")
+    @classmethod
     def assemble_redis_url(cls, v: str | None, info: FieldValidationInfo) -> str:
         if isinstance(v, str):
             return v
