@@ -22,4 +22,4 @@ class ElasticSettings(BaseSettings):
         return HttpUrl(url).unicode_string()
 
 
-elastic_settings = ElasticSettings()
+elastic_settings = ElasticSettings()  # type: ignore[call-arg]
