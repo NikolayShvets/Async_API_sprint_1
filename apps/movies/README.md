@@ -9,7 +9,7 @@
 ```bash
 python -m venv .venv
 ```
-* activete .venv
+* activate .venv
 ```bash
 source .venv/bin/activate
 ```
@@ -35,4 +35,11 @@ cd ../../ &&  make local
 * use shortcut script:
 ```bash
 cd ../../ &&  make
+```
+
+## Test and Lint
+
+- run linters(ruff) and mypy
+```bash
+make plint 
 ```

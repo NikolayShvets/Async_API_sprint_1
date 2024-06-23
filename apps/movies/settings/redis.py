@@ -1,4 +1,4 @@
-from pydantic import RedisDsn, field_validator
+from pydantic import Field, RedisDsn, field_validator
 from pydantic_core.core_schema import FieldValidationInfo
 from settings.base import BaseSettings
 
@@ -10,6 +10,7 @@ class RedisSettings(BaseSettings):
     REDIS_URL: str | None = None
 
     @field_validator("REDIS_URL", mode="before")
+    @classmethod
     def assemble_redis_url(cls, v: str | None, info: FieldValidationInfo) -> str:
         if isinstance(v, str):
             return v
@@ -23,4 +24,4 @@ class RedisSettings(BaseSettings):
         return RedisDsn(url).unicode_string()
 
 
-redis_settings = RedisSettings()
+redis_settings = RedisSettings()  # type: ignore[call-arg]
