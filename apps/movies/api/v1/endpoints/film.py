@@ -1,12 +1,12 @@
 from api.deps import FilmService
 from fastapi import APIRouter, HTTPException, status
-from schemas import Film
+from schemas import FilmSchema
 
 router = APIRouter()
 
 
 @router.get("/{film_id}")
-async def film_details(film_id: str, film_service: FilmService) -> Film:
+async def film_details(film_id: str, film_service: FilmService) -> FilmSchema:
     """
     Получить информацию о фильме по идентификатору
     """
@@ -15,4 +15,4 @@ async def film_details(film_id: str, film_service: FilmService) -> Film:
     if not film:
         raise HTTPException(status.HTTP_404_NOT_FOUND, detail="Film not found")
 
-    return Film(id=film.id, title=film.title)
+    return FilmSchema.model_validate(film)
