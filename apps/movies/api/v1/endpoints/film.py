@@ -15,4 +15,4 @@ async def film_details(film_id: str, film_service: FilmService) -> FilmSchema:
     if not film:
         raise HTTPException(status.HTTP_404_NOT_FOUND, detail="Film not found")
 
-    return film
+    return FilmSchema.model_validate(film)
