@@ -1,0 +1,56 @@
+import json
+import backoff
+import httpx
+from typing import Union
+from indices.movie import movie_index_config
+from indices.person import person_index_config
+from indices.genre import genre_index_config
+from logger import logger
+from models import Movie, Person, Genre
+
+
+class ElasticsearchLoader:
+    indices_config = {
+        'movies': movie_index_config,
+        'persons': person_index_config,
+        'genres': genre_index_config,
+    }
+
+    def __init__(self, host: str, port: str) -> None:
+        self.client = httpx.Client()
+        self.service_url = f'{host}:{port}'
+
+    @backoff.on_exception(backoff.expo, exception=(httpx.ConnectError, httpx.ConnectTimeout))
+    def _check_index_exists(self, index_name: str):
+        response = self.client.head(f"{self.service_url}/{index_name}")
+        return response.status_code == 200
+
+    @backoff.on_exception(backoff.expo, exception=(httpx.ConnectError, httpx.ConnectTimeout))
+    def _create_index(self, index_name: str):
+        index_config = self.indices_config[index_name]
+        self.client.put(f"{self.service_url}/{index_name}", json=index_config)
+
+    @backoff.on_exception(backoff.expo, exception=(httpx.ConnectError, httpx.ConnectTimeout), logger=logger)
+    def upload(self, index_name: str, entities: list[Union[Movie, Person, Genre]]):
+        if not self._check_index_exists(index_name):
+            self._create_index(index_name)
+
+        request_content = []
+
+        for entity in entities:
+            request_content.append(json.dumps({
+                'index': {
+                    '_index': index_name,
+                    '_id': entity.id
+                }
+            }))
+            request_content.append(entity.model_dump_json())
+
+        request_content = '\n'.join(request_content)
+        request_content += '\n'
+
+        self.client.post(
+            f'{self.service_url}/_bulk',
+            headers={'Content-Type': 'application/x-ndjson'},
+            content=request_content
+        )
