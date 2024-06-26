@@ -42,7 +42,7 @@ class PostgresProducer:
 
             for entity_pack in self._iter_over_table(query):
                 entity_ids = [entity['id'] for entity in entity_pack]
-                modified_date = entity_pack[0]['modified']
+                modified_date = entity_pack[-1]['modified']
 
                 yield table, entity_ids, modified_date
 
@@ -51,7 +51,7 @@ class PostgresProducer:
 
         for entity_pack in self._iter_over_table(query):
             entity_ids = [entity['id'] for entity in entity_pack]
-            modified_date = entity_pack[0]['modified']
+            modified_date = entity_pack[-1]['modified']
 
             yield entity_ids, modified_date
 
@@ -60,6 +60,6 @@ class PostgresProducer:
 
         for entity_pack in self._iter_over_table(query):
             entity_ids = [entity['id'] for entity in entity_pack]
-            modified_date = entity_pack[0]['modified']
+            modified_date = entity_pack[-1]['modified']
 
             yield entity_ids, modified_date

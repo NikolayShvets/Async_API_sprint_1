@@ -21,7 +21,7 @@ def main():
 
         while True:
             filmwork_updates = producer.check_filmwork_updates(
-                last_updated_time=state.get_state('movie_modified') or settings.etl.START_TIME
+                last_updated_time=state.get_state('movies_modified') or settings.etl.START_TIME
             )
 
             for updated_table, updated_entities, modified in filmwork_updates:
@@ -38,7 +38,7 @@ def main():
                 time.sleep(settings.etl.ITERATION_SLEEP_TIME)
 
             person_updates = producer.check_person_updates(
-                last_updated_time=state.get_state('person_modified') or settings.etl.START_TIME
+                last_updated_time=state.get_state('persons_modified') or settings.etl.START_TIME
             )
 
             for updated_entities, modified in person_updates:
@@ -53,7 +53,7 @@ def main():
                 time.sleep(settings.etl.ITERATION_SLEEP_TIME)
 
             genre_updates = producer.check_genre_updates(
-                last_updated_time=state.get_state('genre_modified') or settings.etl.START_TIME
+                last_updated_time=state.get_state('genres_modified') or settings.etl.START_TIME
             )
 
             for updated_entities, modified in genre_updates:
