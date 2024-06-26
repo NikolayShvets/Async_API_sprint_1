@@ -1,14 +1,15 @@
+from itertools import groupby
 from operator import itemgetter
+
 import psycopg2
 from utils import BackoffQueryMixin, UUIDEscapingMixin
-from itertools import groupby
 
 
 class PostgresMerger(BackoffQueryMixin, UUIDEscapingMixin):
     def __init__(self, conn: psycopg2.extensions.connection) -> None:
         self.conn = conn
 
-    def _get_query_for_movie_index(self, film_work_ids: list[str]):
+    def _get_query_for_movie_index(self, film_work_ids: list[str]) -> str:
         return f"""
             SELECT
                 fw.id,
@@ -30,7 +31,7 @@ class PostgresMerger(BackoffQueryMixin, UUIDEscapingMixin):
             WHERE fw.id IN ({self.escape_uuids(film_work_ids)});
         """
 
-    def _get_query_for_person_index(self, person_ids: list[str]):
+    def _get_query_for_person_index(self, person_ids: list[str]) -> str:
         return f"""
             SELECT
                 p.id,
@@ -45,7 +46,7 @@ class PostgresMerger(BackoffQueryMixin, UUIDEscapingMixin):
             WHERE p.id IN ({self.escape_uuids(person_ids)});
         """
 
-    def _get_query_for_genre_index(self, genre_ids: list[str]):
+    def _get_query_for_genre_index(self, genre_ids: list[str]) -> str:
         return f"""
             SELECT
                 g.id,
@@ -63,92 +64,93 @@ class PostgresMerger(BackoffQueryMixin, UUIDEscapingMixin):
     def _collect_data_for_movie_index(self, data_by_id: dict[str, list[dict]]) -> list[dict]:
         res = []
         for entity_id, entity_data in data_by_id.items():
-            genres = list(set(map(itemgetter('genre_name'), entity_data)))
+            genres = list(set(map(itemgetter("genre_name"), entity_data)))
 
             persons = [
                 {
-                    'person_id': entity['person_id'],
-                    'person_role': entity['person_role'],
-                    'person_full_name': entity['person_full_name'],
-
+                    "person_id": entity["person_id"],
+                    "person_role": entity["person_role"],
+                    "person_full_name": entity["person_full_name"],
                 }
                 for entity in entity_data
             ]
 
-            res.append({
-                'id': entity_id,
-                'title': entity_data[0]['title'],
-                'description': entity_data[0]['description'],
-                'rating': entity_data[0]['rating'],
-                'type': entity_data[0]['type'],
-                'created': entity_data[0]['created'],
-                'modified': entity_data[0]['modified'],
-                'genres': genres,
-                'persons': persons
-            })
+            res.append(
+                {
+                    "id": entity_id,
+                    "title": entity_data[0]["title"],
+                    "description": entity_data[0]["description"],
+                    "rating": entity_data[0]["rating"],
+                    "type": entity_data[0]["type"],
+                    "created": entity_data[0]["created"],
+                    "modified": entity_data[0]["modified"],
+                    "genres": genres,
+                    "persons": persons,
+                }
+            )
         return res
 
-    def collect_data_for_person_index(self, data_by_id: dict[str, list[dict]]):
+    def collect_data_for_person_index(self, data_by_id: dict[str, list[dict]]) -> list[dict]:
         res = []
         for entity_id, entity_data in data_by_id.items():
             films = []
-            for key, data in groupby(entity_data, itemgetter('filmwork_id')):
+            for key, data in groupby(entity_data, itemgetter("filmwork_id")):
                 data = list(data)
-                films.append({
-                    'id': key,
-                    'title': data[0]['title'],
-                    'rating': data[0]['rating'],
-                    'roles': list(map(itemgetter('role'), data))
-                })
-            res.append({
-                'id': entity_id,
-                'full_name': entity_data[0]['full_name'],
-                'films': films
-            })
+                films.append(
+                    {
+                        "id": key,
+                        "title": data[0]["title"],
+                        "rating": data[0]["rating"],
+                        "roles": list(map(itemgetter("role"), data)),
+                    }
+                )
+            res.append({"id": entity_id, "full_name": entity_data[0]["full_name"], "films": films})
         return res
 
-    def collect_data_for_genre_index(self, data_by_id: dict[str, list[dict]]):
+    def collect_data_for_genre_index(self, data_by_id: dict[str, list[dict]]) -> list[dict]:
         res = []
         for entity_id, entity_data in data_by_id.items():
             films = [
                 {
-                    'id': entity['filmwork_id'],
-                    'title': entity['title'],
-                    'rating': entity['rating'],
+                    "id": entity["filmwork_id"],
+                    "title": entity["title"],
+                    "rating": entity["rating"],
                 }
                 for entity in entity_data
             ]
-            res.append({
-                'id': entity_id,
-                'name': entity_data[0]['name'],
-                'description': entity_data[0]['description'],
-                'films': films
-            })
+            res.append(
+                {
+                    "id": entity_id,
+                    "name": entity_data[0]["name"],
+                    "description": entity_data[0]["description"],
+                    "films": films,
+                }
+            )
         return res
 
     def merge(self, data, for_index: str) -> list[dict]:
-        if for_index == 'movies':
+        if for_index == "movies":
             query = self._get_query_for_movie_index(data)
-        elif for_index == 'persons':
+        elif for_index == "persons":
             query = self._get_query_for_person_index(data)
-        elif for_index == 'genres':
+        elif for_index == "genres":
             query = self._get_query_for_genre_index(data)
         else:
-            raise Exception('unknown index')
+            raise Exception("unknown index")
 
         raw_data = self._execute_query(conn=self.conn, query=query)
 
         data_by_id: dict[str, list[dict]] = {}
 
         for row in raw_data:
-            if not data_by_id.get(row['id']):
-                data_by_id[row['id']] = [row]
+            if not data_by_id.get(row["id"]):
+                data_by_id[row["id"]] = [row]
                 continue
-            data_by_id[row['id']].append(row)
+            data_by_id[row["id"]].append(row)
 
-        if for_index == 'movies':
+        if for_index == "movies":
             return self._collect_data_for_movie_index(data_by_id)
-        if for_index == 'persons':
+        if for_index == "persons":
             return self.collect_data_for_person_index(data_by_id)
-        if for_index == 'genres':
+        if for_index == "genres":
             return self.collect_data_for_genre_index(data_by_id)
