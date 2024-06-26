@@ -1,4 +1,5 @@
 import psycopg2
+from typing import Literal
 from utils import BackoffQueryMixin, UUIDEscapingMixin
 
 
@@ -16,7 +17,7 @@ class PostgresEnricher(BackoffQueryMixin, UUIDEscapingMixin):
         self,
         table_name: str,
         ids: list[str],
-    ):
+    ) -> str:
         return f"""
             SELECT fw.id
             FROM content.film_work fw
@@ -25,7 +26,7 @@ class PostgresEnricher(BackoffQueryMixin, UUIDEscapingMixin):
             ORDER BY modified;
         """
 
-    def enrich(self, table: str, entity_ids: list[str]):
+    def enrich(self, table: Literal['film_work', 'person', 'genre'], entity_ids: list[str]) -> list[str]:
         if table == 'film_work':
             return entity_ids
 

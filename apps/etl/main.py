@@ -12,16 +12,16 @@ from loader import ElasticsearchLoader
 def main():
     logger.info('etl process started')
     with get_postges_connection() as conn:
-        state = State(storage=JsonFileStorage(file_path=settings['storage_file_path']))
-        producer = PostgresProducer(conn=conn, extract_size=settings['etl_extract_size'])
+        state = State(storage=JsonFileStorage(file_path=settings.etl.STORAGE_FILE_PATH))
+        producer = PostgresProducer(conn=conn, extract_size=settings.etl.EXTRACT_SIZE)
         enricher = PostgresEnricher(conn=conn)
         merger = PostgresMerger(conn=conn)
         transformer = Transformer()
-        loader = ElasticsearchLoader(host=settings['elastic_host'], port=settings['elastic_port'])
+        loader = ElasticsearchLoader(host=settings.elastic.HOST, port=settings.elastic.PORT)
 
         while True:
             filmwork_updates = producer.check_filmwork_updates(
-                last_updated_time=state.get_state('movie_modified') or settings['etl_start_time']
+                last_updated_time=state.get_state('movie_modified') or settings.etl.START_TIME
             )
 
             for updated_table, updated_entities, modified in filmwork_updates:
@@ -33,12 +33,12 @@ def main():
                 state.set_state(key=f'{index_name}_modified', value=modified.strftime('%Y-%m-%d %H:%M:%S.%f %z'))
 
                 logger.info(
-                    f"{len(transformed_entities)} updates uploaded to {index_name} index, slepping {settings['etl_iteration_sleep_time']} seconds"
+                    f"{len(transformed_entities)} updates uploaded to {index_name} index, slepping {settings.etl.ITERATION_SLEEP_TIME} seconds"
                 )
-                time.sleep(settings['etl_iteration_sleep_time'])
+                time.sleep(settings.etl.ITERATION_SLEEP_TIME)
 
             person_updates = producer.check_person_updates(
-                last_updated_time=state.get_state('person_modified') or settings['etl_start_time']
+                last_updated_time=state.get_state('person_modified') or settings.etl.START_TIME
             )
 
             for updated_entities, modified in person_updates:
@@ -48,12 +48,12 @@ def main():
                 loader.upload(index_name=index_name, entities=transformed_entities)
                 state.set_state(key=f'{index_name}_modified', value=modified.strftime('%Y-%m-%d %H:%M:%S.%f %z'))
                 logger.info(
-                    f"{len(transformed_entities)} updates uploaded to {index_name} index, slepping {settings['etl_iteration_sleep_time']} seconds"
+                    f"{len(transformed_entities)} updates uploaded to {index_name} index, slepping {settings.etl.ITERATION_SLEEP_TIME} seconds"
                 )
-                time.sleep(settings['etl_iteration_sleep_time'])
+                time.sleep(settings.etl.ITERATION_SLEEP_TIME)
 
             genre_updates = producer.check_genre_updates(
-                last_updated_time=state.get_state('genre_modified') or settings['etl_start_time']
+                last_updated_time=state.get_state('genre_modified') or settings.etl.START_TIME
             )
 
             for updated_entities, modified in genre_updates:
@@ -63,12 +63,12 @@ def main():
                 loader.upload(index_name=index_name, entities=transformed_entities)
                 state.set_state(key=f'{index_name}_modified', value=modified.strftime('%Y-%m-%d %H:%M:%S.%f %z'))
                 logger.info(
-                    f"{len(transformed_entities)} updates uploaded to {index_name} index, slepping {settings['etl_iteration_sleep_time']} seconds"
+                    f"{len(transformed_entities)} updates uploaded to {index_name} index, slepping {settings.etl.ITERATION_SLEEP_TIME} seconds"
                 )
-                time.sleep(settings['etl_iteration_sleep_time'])
+                time.sleep(settings.etl.ITERATION_SLEEP_TIME)
 
-            logger.info(f"no updates found, slepping {settings['etl_checking_updates_sleep_time']} seconds")
-            time.sleep(settings['etl_checking_updates_sleep_time'])
+            logger.info(f"no updates found, slepping {settings.etl.CHECKING_UPDATES_SLEEP_TIME} seconds")
+            time.sleep(settings.etl.CHECKING_UPDATES_SLEEP_TIME)
 
 
 if __name__ == '__main__':

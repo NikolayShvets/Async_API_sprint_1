@@ -8,7 +8,7 @@ class PostgresMerger(BackoffQueryMixin, UUIDEscapingMixin):
     def __init__(self, conn: psycopg2.extensions.connection) -> None:
         self.conn = conn
 
-    def _get_query_for_movie_index(self, film_work_ids: list[str]):
+    def _get_query_for_movie_index(self, film_work_ids: list[str]) -> str:
         return f"""
             SELECT
                 fw.id,
@@ -30,7 +30,7 @@ class PostgresMerger(BackoffQueryMixin, UUIDEscapingMixin):
             WHERE fw.id IN ({self.escape_uuids(film_work_ids)});
         """
 
-    def _get_query_for_person_index(self, person_ids: list[str]):
+    def _get_query_for_person_index(self, person_ids: list[str]) -> str:
         return f"""
             SELECT
                 p.id,
@@ -45,7 +45,7 @@ class PostgresMerger(BackoffQueryMixin, UUIDEscapingMixin):
             WHERE p.id IN ({self.escape_uuids(person_ids)});
         """
 
-    def _get_query_for_genre_index(self, genre_ids: list[str]):
+    def _get_query_for_genre_index(self, genre_ids: list[str]) -> str:
         return f"""
             SELECT
                 g.id,
@@ -88,7 +88,7 @@ class PostgresMerger(BackoffQueryMixin, UUIDEscapingMixin):
             })
         return res
 
-    def collect_data_for_person_index(self, data_by_id: dict[str, list[dict]]):
+    def collect_data_for_person_index(self, data_by_id: dict[str, list[dict]]) -> list[dict]:
         res = []
         for entity_id, entity_data in data_by_id.items():
             films = []
@@ -107,7 +107,7 @@ class PostgresMerger(BackoffQueryMixin, UUIDEscapingMixin):
             })
         return res
 
-    def collect_data_for_genre_index(self, data_by_id: dict[str, list[dict]]):
+    def collect_data_for_genre_index(self, data_by_id: dict[str, list[dict]]) -> list[dict]:
         res = []
         for entity_id, entity_data in data_by_id.items():
             films = [

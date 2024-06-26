@@ -1,6 +1,8 @@
 import backoff
 import psycopg2
 from logger import logger
+from typing import Generator, Any, Literal
+from datetime import datetime
 
 
 class PostgresProducer:
@@ -12,7 +14,7 @@ class PostgresProducer:
         self,
         table_name: str,
         modified_after: str,
-    ):
+    ) -> str:
         return f"""
             SELECT id, modified
             FROM content.{table_name}
@@ -31,7 +33,10 @@ class PostgresProducer:
                 break
             yield [dict(row) for row in rows]
 
-    def check_filmwork_updates(self, last_updated_time: str):
+    def check_filmwork_updates(
+        self,
+        last_updated_time: str
+    ) -> Generator[tuple[Literal['film_work', 'person', 'genre'], list[str], datetime], Any, None]:
         for table in ('film_work', 'person', 'genre'):
             query = self._get_query(table_name=table, modified_after=last_updated_time)
 
@@ -41,7 +46,7 @@ class PostgresProducer:
 
                 yield table, entity_ids, modified_date
 
-    def check_person_updates(self, last_updated_time: str):
+    def check_person_updates(self, last_updated_time: str) -> Generator[tuple[list[str], datetime], Any, None]:
         query = self._get_query(table_name='person', modified_after=last_updated_time)
 
         for entity_pack in self._iter_over_table(query):
@@ -50,7 +55,7 @@ class PostgresProducer:
 
             yield entity_ids, modified_date
 
-    def check_genre_updates(self, last_updated_time: str):
+    def check_genre_updates(self, last_updated_time: str) -> Generator[tuple[list[str], datetime], Any, None]:
         query = self._get_query(table_name='genre', modified_after=last_updated_time)
 
         for entity_pack in self._iter_over_table(query):

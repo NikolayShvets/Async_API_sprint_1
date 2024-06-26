@@ -2,7 +2,7 @@ from models import Movie, Person, Genre
 
 
 class Transformer:
-    def _transform_persons(self, persons: list[dict]):
+    def _transform_persons(self, persons: list[dict]) -> dict[str, list]:
         processed_person_ids = set()
         res = {
             'directors_names': [],

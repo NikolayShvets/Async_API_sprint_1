@@ -1,4 +1,3 @@
-from typing import Union, Optional
 from pydantic import BaseModel, Field
 
 
@@ -9,9 +8,9 @@ class PersonEntity(BaseModel):
 
 class Movie(BaseModel):
     id: str
-    imdb_rating: Union[float, None]
+    imdb_rating: float | None
     title: str
-    description: Union[str, None]
+    description: str | None
     genres: list[str]
     directors_names: list[str]
     actors_names: list[str]
@@ -24,7 +23,7 @@ class Movie(BaseModel):
 class PersonFilmwork(BaseModel):
     id: str
     title: str
-    imdb_rating: Union[float, None] = Field(alias='rating')
+    imdb_rating: float | None = Field(alias='rating')
     roles: list[str]
 
 
@@ -37,11 +36,11 @@ class Person(BaseModel):
 class GenreFilmwork(BaseModel):
     id: str
     title: str
-    imdb_rating: Union[float, None] = Field(alias='rating')
+    imdb_rating: float | None = Field(alias='rating')
 
 
 class Genre(BaseModel):
     id: str
     name: str
-    description: Optional[str] = None
+    description: str | None
     films: list[GenreFilmwork]

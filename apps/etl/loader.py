@@ -18,20 +18,20 @@ class ElasticsearchLoader:
 
     def __init__(self, host: str, port: str) -> None:
         self.client = httpx.Client()
-        self.service_url = f'{host}:{port}'
+        self.service_url = f'http://{host}:{port}'
 
     @backoff.on_exception(backoff.expo, exception=(httpx.ConnectError, httpx.ConnectTimeout))
-    def _check_index_exists(self, index_name: str):
+    def _check_index_exists(self, index_name: str) -> bool:
         response = self.client.head(f"{self.service_url}/{index_name}")
         return response.status_code == 200
 
     @backoff.on_exception(backoff.expo, exception=(httpx.ConnectError, httpx.ConnectTimeout))
-    def _create_index(self, index_name: str):
+    def _create_index(self, index_name: str) -> None:
         index_config = self.indices_config[index_name]
         self.client.put(f"{self.service_url}/{index_name}", json=index_config)
 
     @backoff.on_exception(backoff.expo, exception=(httpx.ConnectError, httpx.ConnectTimeout), logger=logger)
-    def upload(self, index_name: str, entities: list[Union[Movie, Person, Genre]]):
+    def upload(self, index_name: str, entities: list[Union[Movie, Person, Genre]]) -> None:
         if not self._check_index_exists(index_name):
             self._create_index(index_name)
 
