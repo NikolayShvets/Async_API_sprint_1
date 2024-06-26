@@ -26,14 +26,11 @@ class FilmService:
         page_size: int,
         page_number: int,
     ):
-        sort_conf = self._get_sort_conf(sort)
-        query = await self._get_genre_filter_query(genre)
+        sort_field = self._make_sort_field(sort)
+        query = await self._make_genre_query(genre)
 
         return await self._get_films_from_elastic(
-            search_size=page_size,
-            search_from=(page_number - 1) * page_size,
-            sort=sort_conf,
-            query=query
+            search_size=page_size, search_from=(page_number - 1) * page_size, sort=sort_field, query=query
         )
 
     async def search(
@@ -45,27 +42,27 @@ class FilmService:
         return await self._get_films_from_elastic(
             search_size=page_size,
             search_from=(page_number - 1) * page_size,
-            query={'match': {'title': title}},
+            query={"match": {"title": title}},
         )
 
-    def _get_sort_conf(self, sort: str | None):
+    def _make_sort_field(self, sort: str | None):
         if not sort:
             return None
 
         sort_order = sort[0:1]
 
-        if sort_order.startswith('-'):
+        if sort_order.startswith("-"):
             sort_key = sort[1:]
-            order = 'asc'
-            mode = 'min'
+            order = "asc"
+            mode = "min"
         else:
             sort_key = sort
-            order = 'desc'
-            mode = 'max'
+            order = "desc"
+            mode = "max"
 
-        return {sort_key: {'order': order, 'mode': mode}}
+        return {sort_key: {"order": order, "mode": mode}}
 
-    async def _get_genre_filter_query(self, genre: str | None):
+    async def _make_genre_query(self, genre: str | None):
         if not genre:
             return None
 
@@ -74,12 +71,12 @@ class FilmService:
         except NotFoundError:
             return None
 
-        genre_name = Genre(**doc['_source']).name
+        genre_name = Genre(**doc["_source"]).name
 
         return {
-            'bool': {
-                'filter': [
-                    {'term': {'genres': genre_name}},
+            "bool": {
+                "filter": [
+                    {"term": {"genres": genre_name}},
                 ],
             },
         }
@@ -92,31 +89,24 @@ class FilmService:
         return Film(**doc["_source"])
 
     async def _get_films_from_elastic(
-        self,
-        search_size: int,
-        search_from: int,
-        sort: dict | None = None,
-        query: dict | None = None
+        self, search_size: int, search_from: int, sort: dict | None = None, query: dict | None = None
     ):
         search_body: dict[str, int | dict] = {
-            'size': search_size,
-            'from': search_from,
+            "size": search_size,
+            "from": search_from,
         }
 
         if sort:
-            search_body['sort'] = sort
+            search_body["sort"] = sort
         if query:
-            search_body['query'] = query
+            search_body["query"] = query
 
         try:
             doc = await self.elastic.search(index="movies", body=search_body)
         except NotFoundError:
             return None
 
-        return [
-            Film(**hit['_source'])
-            for hit in doc['hits']['hits']
-        ]
+        return [Film(**hit["_source"]) for hit in doc["hits"]["hits"]]
 
 
 @lru_cache(maxsize=1)

@@ -1,5 +1,6 @@
 from uuid import UUID
-from schemas.base import BaseSchema
+
+from api.v1.schemas.base import BaseSchema
 
 
 class PersonSchema(BaseSchema):

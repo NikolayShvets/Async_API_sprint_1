@@ -1,21 +1,21 @@
 from uuid import UUID
 
-from schemas.base import BaseSchema
+from api.v1.schemas.base import BaseSchema
 
 
-class FilmOutPerson(BaseSchema):
-    id: str
+class FilmPerson(BaseSchema):
+    id: UUID
     name: str
 
 
-class FilmOut(BaseSchema):
-    id: str
+class FilmSchema(BaseSchema):
+    id: UUID
     imdb_rating: float | None
     title: str
 
 
-class DetailedFilmOut(BaseSchema):
-    id: str
+class DetailedFilmSchema(BaseSchema):
+    id: UUID
     imdb_rating: float | None
     title: str
     description: str | None
@@ -23,6 +23,6 @@ class DetailedFilmOut(BaseSchema):
     directors_names: list[str]
     actors_names: list[str]
     writers_names: list[str]
-    directors: list[FilmOutPerson]
-    actors: list[FilmOutPerson]
-    writers: list[FilmOutPerson]
+    directors: list[FilmPerson]
+    actors: list[FilmPerson]
+    writers: list[FilmPerson]

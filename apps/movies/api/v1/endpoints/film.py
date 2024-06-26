@@ -1,12 +1,13 @@
-from api.deps import FilmService
-from fastapi import APIRouter, HTTPException, status
-from schemas.film import DetailedFilmOut, FilmOut
 from uuid import UUID
+
+from api.deps import FilmService
+from api.v1.schemas.film import DetailedFilmSchema, FilmSchema
+from fastapi import APIRouter, HTTPException, status
 
 router = APIRouter()
 
 
-@router.get("/search", response_model=list[FilmOut])
+@router.get("/search", response_model=list[FilmSchema])
 async def search_films(
     film_service: FilmService,
     title: str,
@@ -16,19 +17,12 @@ async def search_films(
     """
     Поиск фильмов по названию
     """
-    films = await film_service.search(
-        title=title,
-        page_size=page_size,
-        page_number=page_number
-    )
+    films = await film_service.search(title=title, page_size=page_size, page_number=page_number)
     return films
 
 
-@router.get("/{film_id}", response_model=DetailedFilmOut)
-async def film_details(
-    film_id: UUID,
-    film_service: FilmService
-):
+@router.get("/{film_id}", response_model=DetailedFilmSchema)
+async def film_details(film_id: UUID, film_service: FilmService):
     """
     Получить информацию о фильме по идентификатору
     """
@@ -37,10 +31,10 @@ async def film_details(
     if not film:
         raise HTTPException(status.HTTP_404_NOT_FOUND, detail="Film not found")
 
-    return DetailedFilmOut(**film.model_dump())
+    return film
 
 
-@router.get("/", response_model=list[FilmOut])
+@router.get("/", response_model=list[FilmSchema])
 async def get_films(
     film_service: FilmService,
     sort: str | None = None,
@@ -51,10 +45,5 @@ async def get_films(
     """
     Получить список фильмов для вывода на главную страницу
     """
-    films = await film_service.get_all(
-        sort=sort,
-        genre=str(genre),
-        page_size=page_size,
-        page_number=page_number
-    )
+    films = await film_service.get_all(sort=sort, genre=str(genre), page_size=page_size, page_number=page_number)
     return films

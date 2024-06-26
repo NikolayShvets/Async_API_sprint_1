@@ -1,13 +1,15 @@
+from uuid import UUID
+
 from pydantic import BaseModel
 
 
 class FilmPerson(BaseModel):
-    id: str
+    id: UUID
     name: str
 
 
 class Film(BaseModel):
-    id: str
+    id: UUID
     imdb_rating: float | None
     title: str
     description: str | None
