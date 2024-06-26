@@ -5,6 +5,7 @@ from db import elastic, redis
 from elasticsearch import AsyncElasticsearch
 from fastapi import FastAPI
 from fastapi.responses import ORJSONResponse
+from fastapi_pagination import add_pagination
 from redis.asyncio import Redis
 from settings.api import api_settings
 from settings.elastic import elastic_settings
@@ -31,3 +32,5 @@ app = FastAPI(
 
 
 app.include_router(api_router_v1)
+
+add_pagination(app)

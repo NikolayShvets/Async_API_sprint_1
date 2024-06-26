@@ -1,26 +1,32 @@
 from functools import lru_cache
+from typing import Any
 
 from elasticsearch import AsyncElasticsearch, NotFoundError
 from models import Person
 from services.deps import ElasticClient
-
-type SearchQuery = dict[
-    str, dict[str, dict[str, list[dict[str, dict[str, str | dict[str, str | dict[str, dict[str, str]]]]]]]]
-]
 
 
 class PersonService:
     def __init__(self, elastic: AsyncElasticsearch) -> None:
         self.elastic = elastic
 
-    async def filter(self, name_filter: str | None = None, role_filter: str | None = None) -> list[Person]:
-        query: SearchQuery = {"query": {"bool": {"must": []}}}
+    async def filter(
+        self,
+        name: str | None = None,
+        role: str | None = None,
+        film_title: str | None = None,
+    ) -> list[Person]:
+        query: dict[str, Any] = {"query": {"bool": {"must": []}}}
 
-        if name_filter:
-            query["query"]["bool"]["must"].append({"match": {"full_name": name_filter}})
-        if role_filter:
+        if name:
+            query["query"]["bool"]["must"].append({"match": {"full_name": name}})
+        if role:
             query["query"]["bool"]["must"].append(
-                {"nested": {"path": "films", "query": {"match": {"films.roles": role_filter}}}}
+                {"nested": {"path": "films", "query": {"match": {"films.roles": role}}}}
+            )
+        if film_title:
+            query["query"]["bool"]["must"].append(
+                {"nested": {"path": "films", "query": {"match": {"films.title": film_title}}}}
             )
 
         data = await self.elastic.search(index="persons", body=query)
