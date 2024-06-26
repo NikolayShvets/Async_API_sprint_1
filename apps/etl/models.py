@@ -23,7 +23,7 @@ class Movie(BaseModel):
 class PersonFilmwork(BaseModel):
     id: str
     title: str
-    imdb_rating: float | None = Field(alias='rating')
+    imdb_rating: float | None = Field(alias="rating")
     roles: list[str]
 
 
@@ -36,7 +36,7 @@ class Person(BaseModel):
 class GenreFilmwork(BaseModel):
     id: str
     title: str
-    imdb_rating: float | None = Field(alias='rating')
+    imdb_rating: float | None = Field(alias="rating")
 
 
 class Genre(BaseModel):
