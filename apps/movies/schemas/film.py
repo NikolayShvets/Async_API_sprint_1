@@ -1,4 +1,3 @@
-from typing import Optional
 from schemas.base import BaseModel
 
 
@@ -7,14 +6,13 @@ class FilmOutPerson(BaseModel):
     name: str
 
 
-class GetFilmsQueryParams(BaseModel):
-    sort: str | None = None
-    genre: str | None = None
-    page_size: int = 2
-    page_number: int = 1
-
-
 class FilmOut(BaseModel):
+    id: str
+    imdb_rating: float | None
+    title: str
+
+
+class DetailedFilmOut(BaseModel):
     id: str
     imdb_rating: float | None
     title: str

@@ -36,9 +36,21 @@ class FilmService:
             query=query
         )
 
+    async def search(
+        self,
+        title: str,
+        page_size: int,
+        page_number: int,
+    ):
+        return await self._get_films_from_elastic(
+            search_size=page_size,
+            search_from=(page_number - 1) * page_size,
+            query={'match': {'title': title}},
+        )
+
     def _get_sort_conf(self, sort: str | None):
         if not sort:
-            return {}
+            return None
 
         sort_order = sort[0:1]
 
@@ -86,7 +98,7 @@ class FilmService:
         sort: dict | None = None,
         query: dict | None = None
     ):
-        search_body = {
+        search_body: dict[str, int | dict] = {
             'size': search_size,
             'from': search_from,
         }
