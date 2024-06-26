@@ -3,6 +3,6 @@ from uuid import UUID
 from schemas.base import BaseSchema
 
 
-class FilmSchema(BaseSchema):
+class GenreSchema(BaseSchema):
     id: UUID
-    title: str
+    name: str

@@ -9,9 +9,8 @@ class ElasticSettings(BaseSettings):
     ELASTIC_URL: str | None = None
 
     @field_validator("ELASTIC_URL", mode="before")
-    def assemble_elasticsearch_url(
-        cls, v: str | None, info: FieldValidationInfo
-    ) -> str:
+    @classmethod
+    def assemble_elasticsearch_url(cls, v: str | None, info: FieldValidationInfo) -> str:
         if isinstance(v, str):
             return v
 
@@ -23,4 +22,4 @@ class ElasticSettings(BaseSettings):
         return HttpUrl(url).unicode_string()
 
 
-elastic_settings = ElasticSettings()
+elastic_settings = ElasticSettings()  # type: ignore[call-arg]

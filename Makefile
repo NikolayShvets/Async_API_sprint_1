@@ -1,3 +1,5 @@
+CODE ?= ./apps
+
 .PHONY: up down local lint
 
 up:
@@ -9,9 +11,10 @@ down:
 local:
 	docker compose -f docker-compose.local.yml up -d --build
 
-lint:
-	isort .
-	black .
+plint:
+	ruff format $(CODE)
+	ruff check $(CODE) --fix --show-fixes
+	MYPYPATH=./apps/movies mypy --explicit-package-bases $(CODE)
 
 
 .DEFAULT_GOAL := up

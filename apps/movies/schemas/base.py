@@ -1,6 +1,5 @@
-from pydantic import BaseModel
-from pydantic import ConfigDict
+from pydantic import BaseModel, ConfigDict
 
 
-class BaseModel(BaseModel):
+class BaseSchema(BaseModel):
     model_config = ConfigDict(from_attributes=True)

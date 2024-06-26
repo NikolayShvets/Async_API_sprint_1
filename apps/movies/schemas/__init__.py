@@ -1,1 +1,1 @@
-from schemas.film import Film
+from schemas.film import FilmSchema

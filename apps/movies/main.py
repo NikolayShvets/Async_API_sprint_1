@@ -13,10 +13,10 @@ from settings.redis import redis_settings
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    redis.redis = Redis.from_url(redis_settings.REDIS_URL)
+    redis.redis = Redis.from_url(redis_settings.REDIS_URL)  # type: ignore[arg-type]
     elastic.es = AsyncElasticsearch(elastic_settings.ELASTIC_URL)
     yield
-    await redis.redis.close()
+    await redis.redis.close()  # type: ignore[union-attr]
     await elastic.es.close()
 
 
