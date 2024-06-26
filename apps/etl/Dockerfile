@@ -10,6 +10,4 @@ RUN pip install --upgrade pip \
 
 COPY . .
 
-EXPOSE 8000
-
 CMD ["python", "main.py"]
