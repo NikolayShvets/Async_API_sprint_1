@@ -1,18 +1,20 @@
-from schemas.base import BaseModel
+from uuid import UUID
+
+from schemas.base import BaseSchema
 
 
-class FilmOutPerson(BaseModel):
+class FilmOutPerson(BaseSchema):
     id: str
     name: str
 
 
-class FilmOut(BaseModel):
+class FilmOut(BaseSchema):
     id: str
     imdb_rating: float | None
     title: str
 
 
-class DetailedFilmOut(BaseModel):
+class DetailedFilmOut(BaseSchema):
     id: str
     imdb_rating: float | None
     title: str
