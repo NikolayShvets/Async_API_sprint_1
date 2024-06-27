@@ -1,9 +1,8 @@
 from uuid import UUID
 
 from api.deps import PersonService
-from api.v1.schemas import PersonSchema
 from fastapi import APIRouter, HTTPException, status
-from fastapi_pagination import Page, paginate
+from schemas import PersonSchema
 
 router = APIRouter()
 
@@ -18,19 +17,16 @@ async def preson_details(person_service: PersonService, person_id: UUID) -> Pers
     if not person:
         raise HTTPException(status.HTTP_404_NOT_FOUND, detail="Person not found")
 
-    return person
+    return PersonSchema.model_validate(person)
 
 
 @router.get("/")
 async def person_list(
-    person_service: PersonService,
-    name: str | None = None,
-    role: str | None = None,
-    film_title: str | None = None,
-) -> Page[PersonSchema]:
+    person_service: PersonService, name: str | None = None, role: str | None = None
+) -> list[PersonSchema]:
     """
     Список персон
     """
-    persons = await person_service.filter(name, role, film_title)
+    persons = await person_service.filter()
 
-    return paginate(persons)
+    return [PersonSchema.model_validate(person) for person in persons]

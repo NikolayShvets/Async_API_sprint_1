@@ -1,8 +1,8 @@
 from uuid import UUID
 
 from api.deps import FilmService
-from api.v1.schemas import FilmSchema
 from fastapi import APIRouter, HTTPException, status
+from schemas import FilmSchema
 
 router = APIRouter()
 
