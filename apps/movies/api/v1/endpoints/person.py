@@ -1,18 +1,34 @@
 from uuid import UUID
 
 from api.deps import PersonService
-from api.v1.schemas import PersonSchema
+from api.v1.schemas import FilmSchema, PersonSchema
 from fastapi import APIRouter, HTTPException, status
-from fastapi_pagination import Page, paginate
 
 router = APIRouter()
 
 
+@router.get("/search")
+async def search(
+    person_service: PersonService,
+    name: str | None = None,
+    role: str | None = None,
+    film_title: str | None = None,
+    page_size: int = 20,
+    page_number: int = 1,
+) -> list[PersonSchema]:
+    """
+    Поиск персон по имени, роли и названию фильма
+    """
+
+    return await person_service.search(page_size, page_number, name, role, film_title)
+
+
 @router.get("/{person_id}")
-async def preson_details(person_service: PersonService, person_id: UUID) -> PersonSchema:
+async def details(person_service: PersonService, person_id: UUID) -> PersonSchema:
     """
     Получить информацию о персоне по идентификатору
     """
+
     person = await person_service.get_by_id(str(person_id))
 
     if not person:
@@ -21,16 +37,15 @@ async def preson_details(person_service: PersonService, person_id: UUID) -> Pers
     return person
 
 
-@router.get("/")
-async def person_list(
+@router.get("/{person_id}/films")
+async def films(
     person_service: PersonService,
-    name: str | None = None,
-    role: str | None = None,
-    film_title: str | None = None,
-) -> Page[PersonSchema]:
+    person_id: UUID,
+    page_size: int = 20,
+    page_number: int = 1,
+) -> list[FilmSchema]:
     """
-    Список персон
+    Список фильмов персоны
     """
-    persons = await person_service.filter(name, role, film_title)
 
-    return paginate(persons)
+    return await person_service.get_films(str(person_id), page_size, page_number)
