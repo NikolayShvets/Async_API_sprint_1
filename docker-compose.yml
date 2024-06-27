@@ -70,6 +70,16 @@ services:
       - ./apps/configs:/etc/nginx/conf.d:ro
     depends_on:
       - movies
+  
+  etl:
+    build:
+      context: ./apps/etl
+    env_file: ./apps/.env
+    depends_on:
+      - postgres
+      - elastic
+    volumes:
+      - etl_data:/usr/share/etl/data
 
 volumes:
   elastic_data:
@@ -93,3 +103,10 @@ volumes:
       type: none
       o: bind
       device: ./dbs/redis-data
+  etl_data:
+    name: etl_data
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./dbs/etl-data
