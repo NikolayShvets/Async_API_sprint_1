@@ -1,8 +1,8 @@
 from uuid import UUID
 
 from api.deps import GenreService
-from api.v1.schemas import GenreSchema
 from fastapi import APIRouter, HTTPException, status
+from schemas import GenreSchema
 
 router = APIRouter()
 
