@@ -1,4 +1,5 @@
 from functools import lru_cache
+from typing import Any
 from uuid import UUID
 
 from elasticsearch import AsyncElasticsearch, NotFoundError
@@ -11,6 +12,18 @@ class GenreService:
         self.elastic = elastic
 
     async def get_by_id(self, genre_id: UUID) -> Genre | None:
+        genre = await self._get_genre_from_elastic(genre_id)
+        # todo: cache
+
+        return genre
+
+    async def get_all_genres(self):
+        query: dict[str, Any] = {"query": {"bool": {"must": []}}}
+        data = await self.elastic.search(index="genres", body=query)
+
+        return [Genre(**hit["_source"]) for hit in data["hits"]["hits"]]
+
+    async def _get_genre_from_elastic(self, genre_id: UUID) -> Genre | None:
         try:
             doc = await self.elastic.get(index="genres", id=str(genre_id))
         except NotFoundError:
