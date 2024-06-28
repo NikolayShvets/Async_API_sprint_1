@@ -1,7 +1,8 @@
 from uuid import UUID
 
 from api.deps import PersonService
-from api.v1.schemas import FilmSchema, PersonSchema
+from api.v1.schemas.person import PersonSchema
+from api.v1.schemas.film import FilmSchema
 from fastapi import APIRouter, HTTPException, status
 
 router = APIRouter()
