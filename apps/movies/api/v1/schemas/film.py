@@ -1,14 +1,20 @@
 from uuid import UUID
 
-from pydantic import BaseModel
+from api.v1.schemas.base import BaseSchema
 
 
-class FilmPerson(BaseModel):
+class FilmPerson(BaseSchema):
     id: UUID
     name: str
 
 
-class Film(BaseModel):
+class FilmSchema(BaseSchema):
+    id: UUID
+    imdb_rating: float | None
+    title: str
+
+
+class DetailedFilmSchema(BaseSchema):
     id: UUID
     imdb_rating: float | None
     title: str
