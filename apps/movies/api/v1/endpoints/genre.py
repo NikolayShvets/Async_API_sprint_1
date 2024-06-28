@@ -18,8 +18,8 @@ async def genre_by_id(genre_id: UUID, genre_service: GenreService) -> Genre:
     return genre
 
 
-@router.get("/")
-async def genre_list(genre_service: GenreService) -> list[GenreSchema]:
+@router.get("/", response_model=list[GenreSchema])
+async def genre_list(genre_service: GenreService) -> list[Genre]:
     genres = await genre_service.get_all_genres()
 
     return genres

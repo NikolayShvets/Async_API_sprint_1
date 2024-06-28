@@ -17,7 +17,7 @@ class GenreService:
 
         return genre
 
-    async def get_all_genres(self):
+    async def get_all_genres(self) -> list[Genre]:
         query: dict[str, Any] = {"query": {"bool": {"must": []}}}
         data = await self.elastic.search(index="genres", body=query)
 
