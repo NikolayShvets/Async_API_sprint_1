@@ -14,7 +14,7 @@ async def genre_by_id(genre_id: UUID, genre_service: GenreService) -> GenreSchem
     if not genre:
         raise HTTPException(status.HTTP_404_NOT_FOUND, detail="Genre not found")
 
-    return GenreSchema.model_validate(genre)
+    return genre  # type: ignore[return-value]
 
 
 @router.get("/")
