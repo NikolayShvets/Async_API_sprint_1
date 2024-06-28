@@ -13,6 +13,7 @@ class FilmSchema(BaseSchema):
     imdb_rating: float | None
     title: str
 
+
 class DetailedFilmSchema(BaseSchema):
     id: UUID
     imdb_rating: float | None
