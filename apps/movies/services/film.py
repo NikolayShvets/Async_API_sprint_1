@@ -6,6 +6,8 @@ from models.genre import Genre
 from redis.asyncio import Redis
 from services.deps import ElasticClient, RedisClient
 
+FILM_CACHE_EXPIRE_IN_SECONDS = 60 * 5
+
 
 class FilmService:
     def __init__(self, redis: Redis, elastic: AsyncElasticsearch):
@@ -13,9 +15,14 @@ class FilmService:
         self.elastic = elastic
 
     async def get_by_id(self, film_id: str) -> Film | None:
-        film = await self._get_film_from_elastic(film_id)
+        film = await self._film_from_cache(film_id)
+
         if not film:
-            return None
+            film = await self._get_film_from_elastic(film_id)
+            if not film:
+                return None
+
+            await self._put_film_to_cache(film)
 
         return film
 
@@ -25,7 +32,7 @@ class FilmService:
         genre: str | None,
         page_size: int,
         page_number: int,
-    ):
+    ) -> list[Film] | None:
         sort_field = self._make_sort_field(sort)
         query = await self._make_genre_query(genre)
 
@@ -38,7 +45,7 @@ class FilmService:
         title: str,
         page_size: int,
         page_number: int,
-    ):
+    ) -> list[Film] | None:
         return await self._get_films_from_elastic(
             search_size=page_size,
             search_from=(page_number - 1) * page_size,
@@ -90,7 +97,7 @@ class FilmService:
 
     async def _get_films_from_elastic(
         self, search_size: int, search_from: int, sort: dict | None = None, query: dict | None = None
-    ):
+    ) -> list[Film] | None:
         search_body: dict[str, int | dict] = {
             "size": search_size,
             "from": search_from,
@@ -107,6 +114,17 @@ class FilmService:
             return None
 
         return [Film(**hit["_source"]) for hit in doc["hits"]["hits"]]
+
+    async def _film_from_cache(self, film_id: str) -> Film | None:
+        data = await self.redis.get(film_id)
+        if not data:
+            return None
+
+        film = Film.model_validate_json(data)
+        return film
+
+    async def _put_film_to_cache(self, film: Film) -> None:
+        await self.redis.set(str(film.id), film.model_dump_json(), FILM_CACHE_EXPIRE_IN_SECONDS)
 
 
 @lru_cache(maxsize=1)
