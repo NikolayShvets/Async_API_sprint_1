@@ -5,25 +5,24 @@ from uuid import UUID
 from elasticsearch import AsyncElasticsearch, NotFoundError
 from models import Genre
 from redis.asyncio import Redis
+from services.base import BaseService
 from services.deps import ElasticClient, RedisClient
 
-FILM_CACHE_EXPIRE_IN_SECONDS = 60 * 5
 
-
-class GenreService:
+class GenreService(BaseService):
     def __init__(self, elastic: AsyncElasticsearch, redis: Redis) -> None:
+        super().__init__(redis)
         self.elastic = elastic
-        self.redis = redis
 
     async def get_by_id(self, genre_id: UUID) -> Genre | None:
-        genre = await self._genre_from_cache(genre_id)
+        genre = await self.get_item_from_cache(genre_id)
 
         if not genre:
             genre = await self._get_genre_from_elastic(genre_id)
             if not genre:
                 return None
 
-            await self._put_film_to_cache(genre)
+            await self.put_item_to_cache(genre)
 
         return genre
 
@@ -32,17 +31,6 @@ class GenreService:
         data = await self.elastic.search(index="genres", body=query)
 
         return [Genre(**hit["_source"]) for hit in data["hits"]["hits"]]
-
-    async def _genre_from_cache(self, genre_id: UUID) -> Genre | None:
-        data = await self.redis.get(str(genre_id))
-        if not data:
-            return None
-
-        genre = Genre.model_validate_json(data)
-        return genre
-
-    async def _put_film_to_cache(self, genre: Genre):
-        await self.redis.set(str(genre.id), genre.model_dump_json(), FILM_CACHE_EXPIRE_IN_SECONDS)
 
     async def _get_genre_from_elastic(self, genre_id: UUID) -> Genre | None:
         try:
