@@ -30,7 +30,7 @@ async def details(person_service: PersonService, person_id: UUID) -> PersonSchem
     Получить информацию о персоне по идентификатору
     """
 
-    person = await person_service.get_by_id(str(person_id))
+    person = await person_service.get_by_id(person_id)
 
     if not person:
         raise HTTPException(status.HTTP_404_NOT_FOUND, detail="Person not found")
@@ -49,4 +49,4 @@ async def films(
     Список фильмов персоны
     """
 
-    return await person_service.get_films(str(person_id), page_size, page_number)
+    return await person_service.get_films(person_id, page_size, page_number)

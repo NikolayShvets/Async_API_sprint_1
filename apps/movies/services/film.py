@@ -1,28 +1,28 @@
 from functools import lru_cache
+from uuid import UUID
 
 from elasticsearch import AsyncElasticsearch, NotFoundError
 from models import Film
 from models.genre import Genre
 from redis.asyncio import Redis
+from services.base import BaseService
 from services.deps import ElasticClient, RedisClient
 
-FILM_CACHE_EXPIRE_IN_SECONDS = 60 * 5
 
-
-class FilmService:
+class FilmService(BaseService):
     def __init__(self, redis: Redis, elastic: AsyncElasticsearch):
-        self.redis = redis
+        super().__init__(redis)
         self.elastic = elastic
 
-    async def get_by_id(self, film_id: str) -> Film | None:
-        film = await self._film_from_cache(film_id)
+    async def get_by_id(self, film_id: UUID) -> Film | None:
+        film = await self.get_item_from_cache(film_id, Film)
 
         if not film:
             film = await self._get_film_from_elastic(film_id)
             if not film:
                 return None
 
-            await self._put_film_to_cache(film)
+            await self.put_item_to_cache(film)
 
         return film
 
@@ -88,9 +88,9 @@ class FilmService:
             },
         }
 
-    async def _get_film_from_elastic(self, film_id: str) -> Film | None:
+    async def _get_film_from_elastic(self, film_id: UUID) -> Film | None:
         try:
-            doc = await self.elastic.get(index="movies", id=film_id)
+            doc = await self.elastic.get(index="movies", id=str(film_id))
         except NotFoundError:
             return None
         return Film(**doc["_source"])
@@ -114,17 +114,6 @@ class FilmService:
             return None
 
         return [Film(**hit["_source"]) for hit in doc["hits"]["hits"]]
-
-    async def _film_from_cache(self, film_id: str) -> Film | None:
-        data = await self.redis.get(film_id)
-        if not data:
-            return None
-
-        film = Film.model_validate_json(data)
-        return film
-
-    async def _put_film_to_cache(self, film: Film) -> None:
-        await self.redis.set(str(film.id), film.model_dump_json(), FILM_CACHE_EXPIRE_IN_SECONDS)
 
 
 @lru_cache(maxsize=1)
