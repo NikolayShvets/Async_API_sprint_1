@@ -18,18 +18,23 @@ class GenreService(BaseService):
         genre = await self.get_item_from_cache(method="get_by_id", item_id=genre_id)
 
         if not genre:
+            print("\t Not found genre in cache")
             genre = await self._get_genre_from_elastic(genre_id)
             if not genre:
                 return None
-            await self.put_item_to_cache(item=genre, method="get_by_id")
+            await self.put_item_to_cache(item=genre, method="get_by_id", item_id=genre_id)
         return genre
 
     async def get_all_genres(self) -> list[Genre]:
         query: dict[str, Any] = {"query": {"bool": {"must": []}}}
-        data = await self.elastic.search(index="genres", body=query)
+        genres = await self.get_item_from_cache(method="get_all_genres")
 
-        await self.put_item_to_cache(item=data, method="get_all_genres")
-        return [Genre(**hit["_source"]) for hit in data["hits"]["hits"]]
+        if not genres:
+            print("\t Not found genres in cache")
+            genres = await self.elastic.search(index="genres", body=query)
+            await self.put_item_to_cache(item=genres, method="get_all_genres")
+
+        return [Genre(**hit["_source"]) for hit in genres["hits"]["hits"]]
 
     async def _get_genre_from_elastic(self, genre_id: UUID) -> Genre | None:
         try:

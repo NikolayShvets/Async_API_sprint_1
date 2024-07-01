@@ -15,15 +15,15 @@ class FilmService(BaseService):
         self.elastic = elastic
 
     async def get_by_id(self, film_id: UUID) -> Film | None:
-        # film = await self.get_item_from_cache(film_id, Film)
         film = await self.get_item_from_cache(method="get_by_id", item_id=film_id)
 
         if not film:
+            print("\t Not found film in cache")
             film = await self._get_film_from_elastic(film_id)
             if not film:
                 return None
 
-            await self.put_item_to_cache(item=film, method="get_by_id")
+            await self.put_item_to_cache(item=film, method="get_by_id", item_id=film_id)
 
         return film
 
@@ -37,9 +37,21 @@ class FilmService(BaseService):
         sort_field = self._make_sort_field(sort)
         query = await self._make_genre_query(genre)
 
-        return await self._get_films_from_elastic(
-            search_size=page_size, search_from=(page_number - 1) * page_size, sort=sort_field, query=query
+        films = await self.get_item_from_cache(
+            method="get_all", sort=sort, genre=genre, page_size=page_size, page_number=page_number
         )
+
+        if not films:
+            print("\t Not found films in cache")
+
+            films = await self._get_films_from_elastic(
+                search_size=page_size, search_from=(page_number - 1) * page_size, sort=sort_field, query=query
+            )
+            await self.put_item_to_cache(
+                item=films, method="get_all", sort=sort, genre=genre, page_size=page_size, page_number=page_number
+            )
+
+        return films
 
     async def search(
         self,
@@ -47,11 +59,22 @@ class FilmService(BaseService):
         page_size: int,
         page_number: int,
     ) -> list[Film] | None:
-        return await self._get_films_from_elastic(
-            search_size=page_size,
-            search_from=(page_number - 1) * page_size,
-            query={"match": {"title": title}},
+        films = await self.get_item_from_cache(
+            method="search", title=title, page_size=page_size, page_number=page_number
         )
+
+        if not films:
+            print("\t Not found films in cache")
+            films = await self._get_films_from_elastic(
+                search_size=page_size,
+                search_from=(page_number - 1) * page_size,
+                query={"match": {"title": title}},
+            )
+            await self.put_item_to_cache(
+                item=films, method="search", title=title, page_size=page_size, page_number=page_number
+            )
+
+        return films
 
     def _make_sort_field(self, sort: str | None):
         if not sort:
