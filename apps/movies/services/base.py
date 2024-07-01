@@ -11,6 +11,7 @@ class BaseService:
 
     @staticmethod
     def _get_complex_id_new(method: str, **kwargs):
+        # todo переделать монстра
         return (
             f'{method}:{kwargs.get("item_id")}:{kwargs.get("sort")}:{kwargs.get("genre")}:'
             f'{kwargs.get("page_size")}:{kwargs.get("page_number")}:{kwargs.get("title")}:'
