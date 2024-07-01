@@ -1,7 +1,5 @@
-from uuid import UUID
+import pickle
 
-from models import Film, Genre, Person
-from pydantic import BaseModel
 from redis.asyncio import Redis
 
 
@@ -10,14 +8,21 @@ class BaseService:
         self.redis = redis
         self.cache_expire = 300
 
-    async def get_item_from_cache(self, item_id: UUID, item_model: type[BaseModel]):
-        data = await self.redis.get(str(item_id))
+    @staticmethod
+    def _get_complex_id(method, item) -> str:
+        try:
+            item_id = item.id
+        except AttributeError:
+            item_id = None
 
+        return f"{method}:{item_id}"
+
+    async def put_item_to_cache(self, method, item):
+        await self.redis.set(self._get_complex_id(method, item), pickle.dumps(item), self.cache_expire)
+
+    async def get_item_from_cache(self, method, item_id):
+        data = await self.redis.get(self._get_complex_id(method, item_id))
         if not data:
             return None
 
-        data = item_model.model_validate_json(data)
-        return data
-
-    async def put_item_to_cache(self, item: Genre | Film | Person) -> None:
-        await self.redis.set(str(item.id), item.model_dump_json(), self.cache_expire)
+        return pickle.loads(data)
