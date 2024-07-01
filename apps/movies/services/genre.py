@@ -15,7 +15,7 @@ class GenreService(BaseService):
         self.elastic = elastic
 
     async def get_by_id(self, genre_id: UUID) -> Genre | None:
-        genre = await self.get_item_from_cache(item_id=genre_id, method="get_by_id")
+        genre = await self.get_item_from_cache(method="get_by_id", item_id=genre_id)
 
         if not genre:
             genre = await self._get_genre_from_elastic(genre_id)

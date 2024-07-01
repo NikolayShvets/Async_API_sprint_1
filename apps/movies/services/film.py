@@ -15,14 +15,15 @@ class FilmService(BaseService):
         self.elastic = elastic
 
     async def get_by_id(self, film_id: UUID) -> Film | None:
-        film = await self.get_item_from_cache(film_id, Film)
+        # film = await self.get_item_from_cache(film_id, Film)
+        film = await self.get_item_from_cache(method="get_by_id", item_id=film_id)
 
         if not film:
             film = await self._get_film_from_elastic(film_id)
             if not film:
                 return None
 
-            await self.put_item_to_cache(film)
+            await self.put_item_to_cache(item=film, method="get_by_id")
 
         return film
 

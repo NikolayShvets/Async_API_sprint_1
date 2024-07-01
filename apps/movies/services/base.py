@@ -27,6 +27,7 @@ class BaseService:
         await self.redis.set(self._get_complex_id(method=method, item=item), pickle.dumps(item), self.cache_expire)
 
     async def get_item_from_cache(self, method: str, item_id: UUID) -> ItemModel | None:
+        print(f"\n\t Get from cache {method}")
         data = await self.redis.get(self._get_complex_id(method=method, item_id=item_id))
         if not data:
             return None

@@ -43,14 +43,14 @@ class PersonService(BaseService):
         return [Person(**hit["_source"]) for hit in data["hits"]["hits"]]
 
     async def get_by_id(self, person_id: UUID) -> Person | None:
-        person = await self.get_item_from_cache(person_id, Person)
+        person = await self.get_item_from_cache(method="get_by_id", item_id=person_id)
 
         if not person:
             person = await self._get_person_from_elastic(person_id)
             if not person:
                 return None
 
-            await self.put_item_to_cache(person)
+            await self.put_item_to_cache(method="get_by_id", item=person)
 
         return person
 
