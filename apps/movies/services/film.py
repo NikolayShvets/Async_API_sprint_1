@@ -15,7 +15,7 @@ class FilmService(BaseService):
         self.elastic = elastic
 
     async def get_by_id(self, film_id: UUID) -> Film | None:
-        film = await self.get_item_from_cache(method="get_by_id", item_id=film_id)
+        film = await self.get_item_from_cache(method="films/get_by_id", item_id=film_id)
 
         if not film:
             print("\t Not found film in cache")
@@ -23,7 +23,7 @@ class FilmService(BaseService):
             if not film:
                 return None
 
-            await self.put_item_to_cache(item=film, method="get_by_id", item_id=film_id)
+            await self.put_item_to_cache(item=film, method="films/get_by_id", item_id=film_id)
 
         return film
 
@@ -38,7 +38,7 @@ class FilmService(BaseService):
         query = await self._make_genre_query(genre)
 
         films = await self.get_item_from_cache(
-            method="get_all", sort=sort, genre=genre, page_size=page_size, page_number=page_number
+            method="films/get_all", sort=sort, genre=genre, page_size=page_size, page_number=page_number
         )
 
         if not films:
@@ -48,7 +48,7 @@ class FilmService(BaseService):
                 search_size=page_size, search_from=(page_number - 1) * page_size, sort=sort_field, query=query
             )
             await self.put_item_to_cache(
-                item=films, method="get_all", sort=sort, genre=genre, page_size=page_size, page_number=page_number
+                item=films, method="films/get_all", sort=sort, genre=genre, page_size=page_size, page_number=page_number
             )
 
         return films
@@ -60,7 +60,7 @@ class FilmService(BaseService):
         page_number: int,
     ) -> list[Film] | None:
         films = await self.get_item_from_cache(
-            method="search", title=title, page_size=page_size, page_number=page_number
+            method="films/search", title=title, page_size=page_size, page_number=page_number
         )
 
         if not films:
@@ -71,7 +71,7 @@ class FilmService(BaseService):
                 query={"match": {"title": title}},
             )
             await self.put_item_to_cache(
-                item=films, method="search", title=title, page_size=page_size, page_number=page_number
+                item=films, method="films/search", title=title, page_size=page_size, page_number=page_number
             )
 
         return films

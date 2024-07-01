@@ -24,7 +24,7 @@ class BaseService:
     def _get_complex_id_new(method: str, **kwargs):
         return (
             f'{method}:{kwargs.get("item_id")}:{kwargs.get("sort")}:{kwargs.get("genre")}:'
-            f'{kwargs.get("page_size")}:{kwargs.get("page_number")}:{kwargs.get("title")}'
+            f'{kwargs.get("page_size")}:{kwargs.get("page_number")}:{kwargs.get("title")}:{kwargs.get("name")}:{kwargs.get("role")}:{kwargs.get("film_title")}'
         )
 
     async def put_item_to_cache(self, method: str, item: ItemModel | list[ItemModel], **kwargs) -> None:

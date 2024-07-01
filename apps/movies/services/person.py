@@ -38,27 +38,56 @@ class PersonService(BaseService):
                 {"nested": {"path": "films", "query": {"match": {"films.title": film_title}}}}
             )
 
-        data = await self.elastic.search(index="persons", body=query)
+        data = await self.get_item_from_cache(
+            method="persons/search",
+            page_size=page_size,
+            page_number=page_number,
+            name=name,
+            role=role,
+            film_title=film_title,
+        )
+        if not data:
+            print("\t Not found persons in cache")
+            data = await self.elastic.search(index="persons", body=query)
+            await self.put_item_to_cache(
+                item=data,
+                method="persons/search",
+                page_size=page_size,
+                page_number=page_number,
+                name=name,
+                role=role,
+                film_title=film_title,
+            )
 
         return [Person(**hit["_source"]) for hit in data["hits"]["hits"]]
 
     async def get_by_id(self, person_id: UUID) -> Person | None:
-        person = await self.get_item_from_cache(method="get_by_id", item_id=person_id)
+        person = await self.get_item_from_cache(method="persons/get_by_id", item_id=person_id)
 
         if not person:
+            print("\t Not found persons in cache")
             person = await self._get_person_from_elastic(person_id)
             if not person:
                 return None
 
-            await self.put_item_to_cache(method="get_by_id", item=person)
+            await self.put_item_to_cache(method="persons/get_by_id", item=person, item_id=person_id)
 
         return person
 
     async def get_films(self, person_id: UUID, page_size: int, page_number: int) -> list[PersonFilm]:
-        person = await self.get_by_id(person_id)
+        person = await self.get_item_from_cache(
+            method="persons/get_films", item_id=person_id, page_size=page_size, page_number=page_number
+        )
 
         if not person:
-            return []
+            print("\t Not found persons in cache")
+            person = await self.get_by_id(person_id)
+
+            if not person:
+                return []
+            await self.put_item_to_cache(
+                method="persons/get_films", item=person, item_id=person_id, page_size=page_size, page_number=page_number
+            )
 
         return person.films[(page_number - 1) * page_size : page_number * page_size]
 
