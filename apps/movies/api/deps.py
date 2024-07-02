@@ -1,6 +1,7 @@
 from typing import Annotated
 
 from fastapi import Depends
+
 from services.film import FilmService as _FilmService
 from services.film import get_film_service
 from services.genre import GenreService as _GenreService

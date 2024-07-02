@@ -34,3 +34,6 @@ select = [
 
 [lint.flake8-quotes]
 inline-quotes = "double"
+
+[lint.isort]
+known-first-party = ["db", "settings", "api", "models", "services", "core"]
