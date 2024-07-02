@@ -18,7 +18,6 @@ class GenreService(BaseService):
         genre = await self.get_item_from_cache(method="genres/get_by_id", item_id=genre_id)
 
         if not genre:
-            print("\t Not found genre in cache")
             genre = await self._get_genre_from_elastic(genre_id)
             if not genre:
                 return None
@@ -30,7 +29,6 @@ class GenreService(BaseService):
         genres = await self.get_item_from_cache(method="genres/get_all_genres")
 
         if not genres:
-            print("\t Not found genres in cache")
             genres = await self.elastic.search(index="genres", body=query)
             await self.put_item_to_cache(item=genres, method="genres/get_all_genres")
 

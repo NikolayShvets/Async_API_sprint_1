@@ -47,7 +47,6 @@ class PersonService(BaseService):
             film_title=film_title,
         )
         if not data:
-            print("\t Not found persons in cache")
             data = await self.elastic.search(index="persons", body=query)
             await self.put_item_to_cache(
                 item=data,
@@ -65,7 +64,6 @@ class PersonService(BaseService):
         person = await self.get_item_from_cache(method="persons/get_by_id", item_id=person_id)
 
         if not person:
-            print("\t Not found persons in cache")
             person = await self._get_person_from_elastic(person_id)
             if not person:
                 return None
@@ -80,7 +78,6 @@ class PersonService(BaseService):
         )
 
         if not person:
-            print("\t Not found persons in cache")
             person = await self.get_by_id(person_id)
 
             if not person:

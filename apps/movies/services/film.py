@@ -18,7 +18,6 @@ class FilmService(BaseService):
         film = await self.get_item_from_cache(method="films/get_by_id", item_id=film_id)
 
         if not film:
-            print("\t Not found film in cache")
             film = await self._get_film_from_elastic(film_id)
             if not film:
                 return None
@@ -42,8 +41,6 @@ class FilmService(BaseService):
         )
 
         if not films:
-            print("\t Not found films in cache")
-
             films = await self._get_films_from_elastic(
                 search_size=page_size, search_from=(page_number - 1) * page_size, sort=sort_field, query=query
             )
@@ -64,7 +61,6 @@ class FilmService(BaseService):
         )
 
         if not films:
-            print("\t Not found films in cache")
             films = await self._get_films_from_elastic(
                 search_size=page_size,
                 search_from=(page_number - 1) * page_size,
