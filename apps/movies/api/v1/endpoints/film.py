@@ -26,7 +26,7 @@ async def film_details(film_id: UUID, film_service: FilmService):
     """
     Получить информацию о фильме по идентификатору
     """
-    film = await film_service.get_by_id(str(film_id))
+    film = await film_service.get_by_id(film_id)
 
     if not film:
         raise HTTPException(status.HTTP_404_NOT_FOUND, detail="Film not found")

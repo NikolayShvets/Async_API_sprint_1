@@ -31,7 +31,6 @@ select = [
     "N"
 ]
 
-ignore = ["F401"]
 
 [lint.flake8-quotes]
 inline-quotes = "double"

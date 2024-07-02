@@ -43,3 +43,9 @@ cd ../../ &&  make
 ```bash
 make plint 
 ```
+
+* simple curl tests
+```bash
+chmod +x ./apps/movies/tests/curl_tests.sh 
+./apps/movies/tests/curl_tests.sh
+```
